@@ -1,3 +1,4 @@
+const { generateToken } = require("../auth/jwtAuthMiddleware")
 const User = require("../models/user.model")
 const bcrypt = require('bcryptjs')
 
@@ -17,7 +18,6 @@ const signUpController = async (req, res) => {
         const salt = bcrypt.genSaltSync(10)
         const hashedpassword = bcrypt.hashSync(body.password, salt)
 
-
         // generate Profile pic
         const malePic = `https://avatar.iran.liara.run/public/boy?username=${body.name}`
         const femalePic = `https://avatar.iran.liara.run/public/girl?username=${body.name}`
@@ -30,12 +30,21 @@ const signUpController = async (req, res) => {
             profilePic : body.gender === 'male' ? malePic : femalePic
         })
 
-        await newUser.save()
+        if(newUser){
+            // save user to the database
+            await newUser.save()
 
-        res.status(200).json({
-            success : true,
-            message : "User has been created Successfully!"
-        })
+            res.status(200).json({
+                success : true,
+                message : "User has been created Successfully!"
+            })
+        }
+        else{
+            res.status(400).json({
+                success : false,
+                message : "Invalid User Data!"
+            })
+        }
     }
     catch(err){
         console.log("error:", err)
@@ -46,12 +55,52 @@ const signUpController = async (req, res) => {
     }
 }
 
-const loginController = (req, res) => {
+const loginController = async (req, res) => {
     const body = req.body
-    res.status(200).json({
-        success : true,
-        message : "Hii"
-    })
+    try{
+        const user = await User.findOne({email : body.email})
+        const isPasswordCorrect = await bcrypt.compareSync(body.password, user?.password)
+
+        if(!user || !isPasswordCorrect){
+            return res.status(400).json({
+                message : "Invalid Email or Password !",
+                success : false
+            })
+        }
+        else if(user && isPasswordCorrect){
+            const token = generateToken(user._id)
+            res.status(200).json({
+                success : true,
+                token : token,
+                message : "Login Success!"
+            })
+        }
+    }catch(err){
+        res.status(400).json({
+            success : false,
+            message : "Database Error!"
+        })
+    }
 }
 
-module.exports = {signUpController, loginController}
+const getUserDataController = async (req, res) => {
+    const user = req.user
+    try{
+        const userData = await User.findOne({
+            _id : user.userId
+        })
+
+        res.status(200).json({
+            success : true,
+            result : userData
+        })
+    }
+    catch(err){
+        res.status(400).json({
+            success : false,
+            message : "Database Error!"
+        })
+    }
+}
+
+module.exports = {signUpController, loginController, getUserDataController}
