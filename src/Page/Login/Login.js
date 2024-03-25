@@ -3,12 +3,20 @@ import './Login.css'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import getRequestedHeader from '../../utils/util'
+import { useAuthContext } from '../../Context/AuthContext'
 
 const Login = () => {
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const headers = getRequestedHeader()
+    const {authUser, setAuthUser} = useAuthContext()
+    
+    useEffect(()=>{
+        if(authUser?.length) {
+            navigate('/home')
+        }
+    },[authUser])
 
     const handleSignUpText = () =>{
         navigate('/')
@@ -35,7 +43,7 @@ const Login = () => {
             if(res?.data?.success){
                 const token = res?.data?.token
                 localStorage.setItem("token", token)
-                navigate('/home')
+                setAuthUser(token)
             }else{
                 alert(res?.data?.message)
             }

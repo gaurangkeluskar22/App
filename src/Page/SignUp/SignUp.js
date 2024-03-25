@@ -3,6 +3,7 @@ import './SignUp.css'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import getRequestedHeader from '../../utils/util'
+import { useAuthContext } from '../../Context/AuthContext'
 
 const SignUp = () => {
     const navigate = useNavigate()
@@ -11,6 +12,14 @@ const SignUp = () => {
     const [password, setPassword] = useState('')
     const [gender, setGender] = useState('')
     const headers = getRequestedHeader()
+
+    const {authUser, setAuthUser} = useAuthContext()
+    
+    useEffect(()=>{
+        if(authUser?.length) {
+            navigate('/home')
+        }
+    },[authUser])
 
     const handleLoginText = () =>{
         navigate('/login')

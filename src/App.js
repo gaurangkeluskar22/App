@@ -1,19 +1,22 @@
 import logo from './logo.svg';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './Page/HomePage/HomePage';
 import SignUp from './Page/SignUp/SignUp';
 import Login from './Page/Login/Login';
+import { AuthContextProvider} from './Context/AuthContext';
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Routes>
-          <Route path='/' element={<SignUp/>}/>
-          <Route path='/login' element={<Login/>}/>
-          <Route path='/home' element={<HomePage/>}/>
-        </Routes>
+        <AuthContextProvider>
+          <Routes>
+            <Route path='/' element={<SignUp/>}/>
+            <Route path='/login' element={<Login/>}/>
+            <Route path='/home' element={<HomePage/>}/>
+          </Routes>
+        </AuthContextProvider>
       </Router>
     </div>
   );

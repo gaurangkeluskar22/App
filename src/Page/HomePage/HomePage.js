@@ -2,11 +2,22 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import getRequestedHeader from "../../utils/util"
 import { IoLogOut } from "react-icons/io5";
+import { useAuthContext } from "../../Context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
     const headers = getRequestedHeader()
     const [users, setUsers] = useState([])
     const [loggedInUserData, setLoggedInUserData] = useState({})
+    const navigate = useNavigate()
+
+    const {authUser, setAuthUser} = useAuthContext()
+
+    useEffect(()=>{
+        if(!authUser?.length){
+            navigate('/login')
+        }
+    },[authUser])
 
     const fetchUsers = async () => {
         axios.get('http://localhost:9999/api/user/allUsers', headers).then((res)=>{
@@ -35,6 +46,7 @@ const HomePage = () => {
 
     const handleLogOut = () => {
         localStorage.clear()
+        setAuthUser('')
     }
 
     return (
