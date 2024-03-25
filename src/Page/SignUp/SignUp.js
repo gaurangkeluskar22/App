@@ -49,6 +49,9 @@ const SignUp = () => {
             if(res?.data?.success){
                 navigate('/login')
             }
+            else{
+                alert(res?.data?.message)
+            }
         }).catch((err)=>{
             console.log(err)
         })
@@ -57,10 +60,10 @@ const SignUp = () => {
     return(
         <>
             <div style={{display: 'flex', flexDirection: 'row', width: 'inherit', margin:'100px 100px'}}>
-                <div style={{width:'50vw'}}>
+                <div style={{width:'50vw', marginLeft:'100px'}}>
                     <img src="https://herobot.app/wp-content/uploads/2022/11/11-Reasons-Why-A-Chat-Application-Is-Great-For-Business_1.jpg" width={700} />
                 </div>
-                <div style={{width:'50vw', display:'flex', flexDirection:'column', alignItems: 'center', marginTop:'50px'}}>
+                <div style={{width:'50vw', display:'flex', flexDirection:'column', alignItems: 'center', marginTop:'50px', marginRight:'100px'}}>
                     <h1>Sign Up</h1>
                         <input type="text" placeholder="Enter Name:" required onChange={nameChange}/>
                         <input type="text" placeholder="Enter Email:" required onChange={emailChange}/>
@@ -70,7 +73,7 @@ const SignUp = () => {
                             <option name="male" value={'male'}>Male</option>
                             <option name="female" value={'female'}>Female</option>
                         </select>
-                        <button onClick={handleSubmit}>Submit</button> 
+                        <button onClick={handleSubmit} className='button-signup'>Submit</button> 
                     <p onClick={handleLoginText}>Already have an account ? Login Here</p>
                 </div>
             </div>
