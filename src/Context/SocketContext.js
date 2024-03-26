@@ -12,10 +12,10 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({children}) => {
     const [socket, setSocket] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState([])
-    const {authUser, userId} = useAuthContext()
+    const {userId} = useAuthContext()
 
     useEffect(()=>{
-        if(authUser){
+        if(userId){
             const socket = io("https://chatapp-3rqf.onrender.com",{
                 query:{
                     userId : userId
@@ -34,7 +34,7 @@ export const SocketContextProvider = ({children}) => {
                 setSocket(null)
             }
         }
-    },[authUser, userId])
+    },[userId])
 
     return(<SocketContext.Provider value={{socket, onlineUsers}}>{children}</SocketContext.Provider>)
 }

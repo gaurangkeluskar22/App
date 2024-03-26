@@ -43,9 +43,14 @@ const sendMessageController = async (req, res) => {
 
         if(receiverSocketId){
             io.to(receiverSocketId).emit("newMessage", newMessage)
+        }else{
+            console.log("receiverId:", receiverId)
         }
         if(senderSocketId){
             io.to(senderSocketId).emit("newMessage", newMessage)
+        }
+        else{
+            console.log("senderId:",senderSocketId)
         }
         
 
