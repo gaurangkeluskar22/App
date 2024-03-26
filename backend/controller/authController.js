@@ -86,13 +86,9 @@ const loginController = async (req, res) => {
 const getUserDataController = async (req, res) => {
     const user = req.user
     try{
-        const userData = await User.findOne({
-            _id : user.userId
-        })
-
         res.status(200).json({
             success : true,
-            result : userData
+            result : user
         })
     }
     catch(err){
