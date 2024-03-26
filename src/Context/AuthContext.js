@@ -9,9 +9,10 @@ export const useAuthContext = () => {
 
 export const AuthContextProvider = ({ children }) => {
     const [authUser, setAuthUser] = useState(localStorage?.getItem('token') || '');
+    const [userId, setUserId] = useState('')
 
     return (
-        <AuthContext.Provider value={{ authUser, setAuthUser }}>
+        <AuthContext.Provider value={{ authUser, setAuthUser, userId, setUserId }}>
             {children}
         </AuthContext.Provider>
     );

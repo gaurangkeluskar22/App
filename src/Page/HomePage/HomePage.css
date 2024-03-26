@@ -11,4 +11,13 @@
 .chat-send-button{
     height: 40px;
     width: 100px;
+    background-color: #8599FF;
+}
+
+.sender-chat-color{
+    background: rgb(133, 153, 255);;
+}
+
+.receiver-chat-color{
+    background: rgb(207, 215, 255);
 }

@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import getRequestedHeader from "../../utils/util"
 import { IoLogOut } from "react-icons/io5";
 import { useAuthContext } from "../../Context/AuthContext";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { IoChatboxEllipses } from "react-icons/io5";
 import './HomePage.css'
 import moment from "moment";
+import { useSocketContext } from "../../Context/SocketContext";
 
 const HomePage = () => {
     const headers = getRequestedHeader()
@@ -17,7 +18,29 @@ const HomePage = () => {
     const [messages, setMessages] = useState()
     const navigate = useNavigate()
 
-    const {authUser, setAuthUser} = useAuthContext()
+    const {authUser, setAuthUser, setUserId} = useAuthContext()
+    const {onlineUsers, socket} = useSocketContext()
+    const containerRef = useRef(null);
+
+  // This effect will run every time the component updates
+  useEffect(() => {
+    // Scroll to the bottom of the container
+    // containerRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if(messages?.length){
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  },[messages]);
+
+    useEffect(()=>{
+        socket?.on("newMessage", (newMessage)=>{
+            setMessages((prevState)=>[...prevState, newMessage])
+        })
+
+        return () => {
+            socket?.off("newMessage")
+        }
+    },[socket])
+
 
     useEffect(()=>{
         if(!authUser?.length){
@@ -55,6 +78,7 @@ const HomePage = () => {
         axios.get('http://localhost:9999/api/auth/getUserData', headers).then((res)=>{
             if(res?.data?.success){
                 setLoggedInUserData(res?.data?.result)
+                setUserId(res?.data?.result?._id)
             }
         }).catch((err)=>{
             console.log(err)
@@ -69,6 +93,7 @@ const HomePage = () => {
     const handleLogOut = () => {
         localStorage.clear()
         setAuthUser('')
+        setUserId('')
     }
 
     const handleInputChange = (e) => {
@@ -97,7 +122,7 @@ const HomePage = () => {
     return (
         <div style={{display:'flex', flexDirection:'row'}}>
             <div style={{height:'100vh', width:'30vw', display:'flex', flexDirection:'column', overflow:'scroll'}}>
-                <div style={{display:'flex', flexDirection:'row', alignItems:'center', background:'#0C6BF6', justifyContent:'space-between'}}>
+                <div style={{display:'flex', flexDirection:'row', alignItems:'center', background:'#8599FF', justifyContent:'space-between'}}>
                     <div style={{display:'flex', flexDirection:'row', alignItems:'center'}}>
                         <img src={loggedInUserData?.profilePic} width={60} height={60} style={{padding:'10px'}}></img>
                         <div style={{display:'flex', flexDirection:'column', paddingLeft: '10px', alignItems:'start'}}>
@@ -116,7 +141,7 @@ const HomePage = () => {
                                     <img src={user?.profilePic} width={60} height={60} style={{padding:'10px'}}></img>
                                     <div style={{display:'flex', flexDirection:'column', paddingLeft: '10px', alignItems:'start'}}>
                                         <p style={{fontSize:'25px', fontWeight:'normal'}}>{user?.name}</p>
-                                        <p style={{fontSize:'15px'}}>🟢 Online</p>
+                                        <p style={{fontSize:'15px'}}>{ onlineUsers?.includes(user._id) ? '🟢 Online' : '🔴 Offline' } </p>
                                     </div>
                                 </div>
                                 <hr></hr>
@@ -138,30 +163,31 @@ const HomePage = () => {
                 </div>
                 :
                 <div style={{height: '100vh', width:'70vw', alignItems:'start', display:'flex',justifyContent:'end', flexDirection:'column'}}>
-                    <div style={{width:'60vw', background:'#0C6BF6', justifyContent:'start', display:'flex', height:'130px', alignItems:'center'}}>
+                    <div style={{width:'60vw', background:'#8599FF', justifyContent:'start', display:'flex', height:'130px', alignItems:'center'}}>
                         <p style={{padding:'20px', fontSize:'20px'}}>To : {selectedUser?.name}</p>
                     </div>
                         {
                             messages?.length 
                             ? 
-                            <div style={{display: 'flex', flexDirection:'column', width:'60vw', alignItems:'end', height:'130vh', overflow:'scroll'}}>
+                            <div style={{display: 'flex', flexDirection:'column', width:'60vw', alignItems:'end', height:'130vh', overflow:'scroll'}} ref={containerRef}>
                                 { 
                                     messages?.map((message, index)=>{
                                         return(
                                             <div style={{display:'flex', flexDirection:'column', margin:'5px'}}>
-                                            <div key={index} style={{padding:'10px', background:'#92B4EA', borderRadius:'5px'}}>
-                                                {message?.message}
-                                            </div>
-                                            <div>
-                                                {moment(message?.createdAt).format('YYYY-MM-DD HH:mm:ss')}
-                                            </div>
+                                                <div key={index} style={{padding:'10px 10px', borderRadius:'5px', display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center'}} className={message.senderId === loggedInUserData?._id ? 'sender-chat-color' : 'receiver-chat-color'}>
+                                                    <p>{message?.message}</p>
+                                                    <img src={message.senderId === loggedInUserData?._id ? loggedInUserData?.profilePic : selectedUser?.profilePic} width={40} height={40} style={{paddingLeft:'10px'}}/>
+                                                </div>
+                                                <div>
+                                                    {moment(message?.createdAt).format('YYYY-MM-DD HH:mm:ss')}
+                                                </div>
                                             </div>
                                         )
                                     })
                                 }
                             </div>
                             :
-                                <div style={{display:'flex', justifyContent:'center', alignItems:'center',width:'60vw', height:'130vh', fontSize:'30px'}}>Say Hi!</div>
+                                <div style={{display:'flex', justifyContent:'center', alignItems:'center',width:'60vw', height:'130vh', fontSize:'30px'}}  ref={containerRef}>Say Hi!</div>
                         }
                     <div style={{margin:'10px'}}>
                         <input type="text" className="chat-input" onChange={handleInputChange} value={inputMessage} placeholder="Enter Message....."></input>

@@ -1,5 +1,6 @@
 const Conversation = require("../models/conversation.model")
 const Message = require("../models/message.model")
+const { getReceiverSocketId, io, getSenderSocketId } = require("../socket/socket")
 
 
 const sendMessageController = async (req, res) => {
@@ -33,6 +34,18 @@ const sendMessageController = async (req, res) => {
 
         // save both message and conversation object
         await Promise.all([newMessage.save(), conversation.save()])
+
+        // emit message to sender and receiver
+
+        const receiverSocketId = getReceiverSocketId(receiverId)
+        const senderSocketId = getSenderSocketId(senderId)
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage", newMessage)
+        }
+        if(senderSocketId){
+            io.to(senderSocketId).emit("newMessage", newMessage)
+        }
         
 
         res.status(200).json({
