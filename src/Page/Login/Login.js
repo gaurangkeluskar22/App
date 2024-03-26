@@ -10,7 +10,7 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const headers = getRequestedHeader()
-    const {authUser, setAuthUser} = useAuthContext()
+    const {authUser, setAuthUser, setUserId} = useAuthContext()
     
     useEffect(()=>{
         if(authUser?.length) {
@@ -44,6 +44,7 @@ const Login = () => {
                 const token = res?.data?.token
                 localStorage.setItem("token", token)
                 setAuthUser(token)
+                setUserId(res?.data?.userId)
             }else{
                 alert(res?.data?.message)
             }

@@ -78,7 +78,6 @@ const HomePage = () => {
         axios.get('http://localhost:9999/api/auth/getUserData', headers).then((res)=>{
             if(res?.data?.success){
                 setLoggedInUserData(res?.data?.result)
-                setUserId(res?.data?.result?._id)
             }
         }).catch((err)=>{
             console.log(err)
