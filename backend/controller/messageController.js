@@ -38,6 +38,7 @@ const sendMessageController = async (req, res) => {
         // emit message to sender and receiver
 
         const receiverSocketId = getReceiverSocketId(receiverId)
+        console.log("receiverSocketId:", receiverSocketId)
         const senderSocketId = getSenderSocketId(senderId)
 
         if(receiverSocketId){
