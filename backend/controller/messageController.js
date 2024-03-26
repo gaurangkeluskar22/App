@@ -32,11 +32,6 @@ const sendMessageController = async (req, res) => {
             conversation.messages.push(newMessage._id)
         }
 
-        // save both message and conversation object
-        await Promise.all([newMessage.save(), conversation.save()])
-
-        // emit message to sender and receiver
-
         const receiverSocketId = getReceiverSocketId(receiverId)
         console.log("receiverSocketId:", receiverSocketId)
         const senderSocketId = getSenderSocketId(senderId)
@@ -52,6 +47,13 @@ const sendMessageController = async (req, res) => {
         else{
             console.log("senderId:",senderSocketId)
         }
+
+        // save both message and conversation object
+        await Promise.all([newMessage.save(), conversation.save()])
+
+        // emit message to sender and receiver
+
+       
         
 
         res.status(200).json({
