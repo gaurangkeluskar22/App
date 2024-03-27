@@ -39,7 +39,7 @@ const Login = () => {
             password : password,
         }
 
-        await axios.post('http://localhost:9999/api/auth/login', payload, headers).then((res)=>{
+        await axios.post('https://chatapp-3rqf.onrender.com/api/auth/login', payload, headers).then((res)=>{
             if(res?.data?.success){
                 const token = res?.data?.token
                 localStorage.setItem("token", token)

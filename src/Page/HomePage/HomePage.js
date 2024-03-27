@@ -55,7 +55,7 @@ const HomePage = () => {
     },[selectedUser])
 
     const fetchPrevMessages = async () => {
-        axios.get(`http://localhost:9999/api/message/getmessages/${selectedUser?._id}`, headers).then((res)=>{
+        axios.get(`https://chatapp-3rqf.onrender.com/api/message/getmessages/${selectedUser?._id}`, headers).then((res)=>{
             if(res?.data?.success){
                 setMessages(res?.data?.result)
             }
@@ -65,7 +65,7 @@ const HomePage = () => {
     }
 
     const fetchUsers = async () => {
-        axios.get('http://localhost:9999/api/user/allUsers', headers).then((res)=>{
+        axios.get('https://chatapp-3rqf.onrender.com/api/user/allUsers', headers).then((res)=>{
             if(res?.data?.success){
                 setUsers(res?.data?.results)
             }
@@ -75,7 +75,7 @@ const HomePage = () => {
     }
 
     const fetchLoggedInUserData = async () => {
-        axios.get('http://localhost:9999/api/auth/getUserData', headers).then((res)=>{
+        axios.get('https://chatapp-3rqf.onrender.com/api/auth/getUserData', headers).then((res)=>{
             if(res?.data?.success){
                 setLoggedInUserData(res?.data?.result)
             }
@@ -108,7 +108,7 @@ const HomePage = () => {
             const payload = {
                 "message" : inputMessage
             }
-            axios.post(`http://localhost:9999/api/message/send/${selectedUser?._id}`, payload, headers).then((res)=>{
+            axios.post(`https://chatapp-3rqf.onrender.com/api/message/send/${selectedUser?._id}`, payload, headers).then((res)=>{
                 if(res?.data?.success){
                     setInputMessage('')
                 }

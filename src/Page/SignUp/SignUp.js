@@ -54,7 +54,7 @@ const SignUp = () => {
             profilePic : ''
         }
 
-        await axios.post('http://localhost:9999/api/auth/signup', payload, headers).then((res)=>{
+        await axios.post('https://chatapp-3rqf.onrender.com/api/auth/signup', payload, headers).then((res)=>{
             if(res?.data?.success){
                 navigate('/login')
             }
