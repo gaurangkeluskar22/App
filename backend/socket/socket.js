@@ -1,7 +1,7 @@
 const { Server } =  require("socket.io")
 const http = require('http')
 const express = require('express')
-const Redis = require('ioredis')
+const Redis = require('redis')
 
 
 const app = express()
@@ -15,25 +15,18 @@ const io = new Server(server, {
 })
 
 // initializing redis
-const pub = new Redis({
-    host : process.env.REDIS_HOST,
-    port : process.env.PORT,
+const redisOptions = {
+    host: process.env.REDIS_HOST,
+    port: process.env.PORT,
     username : process.env.REDIS_USER,
-    password : process.env.REDIS_PASSWORD,
+    password: process.env.REDIS_PASSWORD,
     tls : {},
-    connectTimeout: 10000,
-    maxRetriesPerRequest: 50
-})
+    connect_timeout: 10000,
+    maxRetriesPerRequest : 50
+};
 
-const sub = new Redis({
-    host : process.env.REDIS_HOST,
-    port : process.env.PORT,
-    username : process.env.REDIS_USER,
-    password : process.env.REDIS_PASSWORD,
-    tls : {},
-    connectTimeout: 10000,
-    maxRetriesPerRequest: 50
-})
+const pub = Redis.createClient(redisOptions);
+const sub = Redis.createClient(redisOptions);
 
 // subscribing to the channel
 sub.subscribe('Message')
