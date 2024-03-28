@@ -29,8 +29,8 @@
   "scripts": {
     "server": "nodemon backend/server.js",
     "start": "node backend/server.js",
-    "build": "set CI=false && npm install && env-cmd -f .env react-scripts build",
-    "build:local" : "set CI=false && npm install && env-cmd -f .env.local react-scripts build",
+    "build": "npm install && env-cmd -f .env react-scripts build",
+    "build:local" : "npm install && env-cmd -f .env.local react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "frontend": "env-cmd -f .env.local react-scripts start"
