@@ -21,7 +21,8 @@ const pub = new Redis({
     username : process.env.REDIS_USER,
     password : process.env.REDIS_PASSWORD,
     tls : {},
-    connectTimeout: 10000
+    connectTimeout: 10000,
+    maxRetriesPerRequest: 50
 })
 
 const sub = new Redis({
@@ -30,7 +31,8 @@ const sub = new Redis({
     username : process.env.REDIS_USER,
     password : process.env.REDIS_PASSWORD,
     tls : {},
-    connectTimeout: 10000
+    connectTimeout: 10000,
+    maxRetriesPerRequest: 50
 })
 
 // subscribing to the channel
