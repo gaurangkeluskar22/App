@@ -28,6 +28,16 @@ const redisOptions = {
 const pub = Redis.createClient(redisOptions);
 const sub = Redis.createClient(redisOptions);
 
+// Handle Redis client errors
+pub.on('error', (error) => {
+    console.error('Error in Redis client:', error);
+});
+
+// Handle Redis client errors
+sub.on('error', (error) => {
+    console.error('Error in Redis server:', error);
+});
+
 // subscribing to the channel
 sub.subscribe('Message')
 
