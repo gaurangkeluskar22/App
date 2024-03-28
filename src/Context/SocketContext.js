@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthContext } from "./AuthContext";
 import io from "socket.io-client";
+import { env } from "../env";
 
 
 export const SocketContext = createContext()
@@ -18,7 +19,7 @@ export const SocketContextProvider = ({children}) => {
         if(userId){
             //https://chatapp-3rqf.onrender.com
             //http://localhost:9999
-            const socket = io("https://chatapp-3rqf.onrender.com",{
+            const socket = io(`${env.REACT_APP_URL}`,{
                 query:{
                     userId : userId
                 }

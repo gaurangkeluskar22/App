@@ -1,6 +1,7 @@
 const { Server } =  require("socket.io")
 const http = require('http')
 const express = require('express')
+const Redis = require('ioredis')
 
 
 const app = express()
@@ -12,6 +13,26 @@ const io = new Server(server, {
         methods : ["GET","POST"]
     }
 })
+
+// initializing redis
+const pub = new Redis({
+    host : process.env.REDIS_HOST,
+    port : process.env.PORT,
+    username : process.env.REDIS_USER,
+    password : process.env.REDIS_PASSWORD,
+    tls : {}
+})
+
+const sub = new Redis({
+    host : process.env.REDIS_HOST,
+    port : process.env.PORT,
+    username : process.env.REDIS_USER,
+    password : process.env.REDIS_PASSWORD,
+    tls : {}
+})
+
+// subscribing to the channel
+sub.subscribe('Message')
 
 
 const getReceiverSocketId = (receiverId) => {
@@ -46,4 +67,4 @@ io.on("connection", (socket)=>{
 })
 
 
-module.exports = {app, io, server, getReceiverSocketId, getSenderSocketId}
+module.exports = {app, io, server, getReceiverSocketId, getSenderSocketId, pub, sub}

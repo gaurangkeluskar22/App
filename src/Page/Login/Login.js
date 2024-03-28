@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import getRequestedHeader from '../../utils/util'
 import { useAuthContext } from '../../Context/AuthContext'
+import { env } from '../../env'
 
 const Login = () => {
     const navigate = useNavigate()
@@ -39,7 +40,8 @@ const Login = () => {
             password : password,
         }
 
-        await axios.post('https://chatapp-3rqf.onrender.com/api/auth/login', payload, headers).then((res)=>{
+        console.log("api:",env.REACT_APP_URL)
+        await axios.post(`${env.REACT_APP_URL}/api/auth/login`, payload, headers).then((res)=>{
             if(res?.data?.success){
                 const token = res?.data?.token
                 localStorage.setItem("token", token)

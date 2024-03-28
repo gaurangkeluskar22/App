@@ -8,6 +8,7 @@ import { IoChatboxEllipses } from "react-icons/io5";
 import './HomePage.css'
 import moment from "moment";
 import { useSocketContext } from "../../Context/SocketContext";
+import { env } from "../../env";
 
 const HomePage = () => {
     const headers = getRequestedHeader()
@@ -55,7 +56,7 @@ const HomePage = () => {
     },[selectedUser])
 
     const fetchPrevMessages = async () => {
-        axios.get(`https://chatapp-3rqf.onrender.com/api/message/getmessages/${selectedUser?._id}`, headers).then((res)=>{
+        axios.get(`${env.REACT_APP_URL}/api/message/getmessages/${selectedUser?._id}`, headers).then((res)=>{
             if(res?.data?.success){
                 setMessages(res?.data?.result)
             }
@@ -65,7 +66,7 @@ const HomePage = () => {
     }
 
     const fetchUsers = async () => {
-        axios.get('https://chatapp-3rqf.onrender.com/api/user/allUsers', headers).then((res)=>{
+        axios.get(`${env.REACT_APP_URL}/api/user/allUsers`, headers).then((res)=>{
             if(res?.data?.success){
                 setUsers(res?.data?.results)
             }
@@ -75,7 +76,7 @@ const HomePage = () => {
     }
 
     const fetchLoggedInUserData = async () => {
-        axios.get('https://chatapp-3rqf.onrender.com/api/auth/getUserData', headers).then((res)=>{
+        axios.get(`${env.REACT_APP_URL}/api/auth/getUserData`, headers).then((res)=>{
             if(res?.data?.success){
                 setLoggedInUserData(res?.data?.result)
             }
@@ -108,7 +109,7 @@ const HomePage = () => {
             const payload = {
                 "message" : inputMessage
             }
-            axios.post(`https://chatapp-3rqf.onrender.com/api/message/send/${selectedUser?._id}`, payload, headers).then((res)=>{
+            axios.post(`${env.REACT_APP_URL}/api/message/send/${selectedUser?._id}`, payload, headers).then((res)=>{
                 if(res?.data?.success){
                     setInputMessage('')
                 }

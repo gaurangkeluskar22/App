@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import getRequestedHeader from '../../utils/util'
 import { useAuthContext } from '../../Context/AuthContext'
+import { env } from '../../env'
 
 const SignUp = () => {
     const navigate = useNavigate()
@@ -54,7 +55,7 @@ const SignUp = () => {
             profilePic : ''
         }
 
-        await axios.post('https://chatapp-3rqf.onrender.com/api/auth/signup', payload, headers).then((res)=>{
+        await axios.post(`${env.REACT_APP_URL}/api/auth/signup`, payload, headers).then((res)=>{
             if(res?.data?.success){
                 navigate('/login')
             }

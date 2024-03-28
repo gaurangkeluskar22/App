@@ -1,6 +1,6 @@
 const Conversation = require("../models/conversation.model")
 const Message = require("../models/message.model")
-const { getReceiverSocketId, io, getSenderSocketId } = require("../socket/socket")
+const { getReceiverSocketId, io, getSenderSocketId, pub, sub } = require("../socket/socket")
 
 
 const sendMessageController = async (req, res) => {
@@ -32,26 +32,31 @@ const sendMessageController = async (req, res) => {
             conversation.messages.push(newMessage._id)
         }
 
-        const receiverSocketId = getReceiverSocketId(receiverId)
-        const senderSocketId = getSenderSocketId(senderId)
-
-        if(receiverSocketId){
-            io.to(receiverSocketId).emit("newMessage", newMessage)
-        }
-
-        if(senderSocketId){
-            io.to(senderSocketId).emit("newMessage", newMessage)
-        }
-        
 
         // save both message and conversation object
         await Promise.all([newMessage.save(), conversation.save()])
         
 
-        // emit message to sender and receiver
+        // publish the message to the server using pub/sub model
+        await pub.publish("Message", JSON.stringify({newMessage}))
 
-       
-        
+        // listen to the message comming from redis
+        sub.on('message', (channel, message)=>{
+            if(channel === 'Message'){
+                const decodedMessage =  JSON.parse(message)
+                // emit message to sender and receiver
+                const receiverSocketId = getReceiverSocketId(decodedMessage?.newMessage?.receiverId)
+                const senderSocketId = getSenderSocketId(decodedMessage?.newMessage?.senderId)
+
+                if(receiverSocketId){
+                    io.to(receiverSocketId).emit("newMessage", decodedMessage?.newMessage)
+                }
+
+                if(senderSocketId){
+                    io.to(senderSocketId).emit("newMessage", decodedMessage?.newMessage)
+                }
+            }
+        })
 
         res.status(200).json({
             success : true,
