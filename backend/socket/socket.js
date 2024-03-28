@@ -20,7 +20,8 @@ const pub = new Redis({
     port : process.env.PORT,
     username : process.env.REDIS_USER,
     password : process.env.REDIS_PASSWORD,
-    tls : {}
+    tls : {},
+    connectTimeout: 10000
 })
 
 const sub = new Redis({
@@ -28,7 +29,8 @@ const sub = new Redis({
     port : process.env.PORT,
     username : process.env.REDIS_USER,
     password : process.env.REDIS_PASSWORD,
-    tls : {}
+    tls : {},
+    connectTimeout: 10000
 })
 
 // subscribing to the channel
