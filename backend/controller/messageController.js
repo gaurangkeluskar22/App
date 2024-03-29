@@ -37,9 +37,12 @@ const sendMessageController = async (req, res) => {
         await Promise.all([newMessage.save(), conversation.save()])
         
 
-        // publish the message to the server using pub/sub model
-        await pub.publish("Message", JSON.stringify({newMessage}))
-
+        try{
+            // publish the message to the server using pub/sub model
+            await pub.publish("Message", JSON.stringify({newMessage}))
+        }catch(err){
+            console.log("err:", err)
+        }
         // listen to the message comming from redis
         sub.on('message', (channel, message)=>{
             if(channel === 'Message'){
@@ -62,7 +65,8 @@ const sendMessageController = async (req, res) => {
             success : true,
             result : "Message has been sent Successfully!"
         })
-    }catch(err){
+    }
+    catch(err){
         console.log("Error:", err)
         res.status(400).json({
             success : false,

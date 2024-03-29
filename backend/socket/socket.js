@@ -1,7 +1,7 @@
 const { Server } =  require("socket.io")
 const http = require('http')
 const express = require('express')
-const Redis = require('redis')
+const Redis = require('ioredis')
 
 
 const app = express()
@@ -17,7 +17,7 @@ const io = new Server(server, {
 // initializing redis
 const redisOptions = {
     host: process.env.REDIS_HOST,
-    port: process.env.PORT,
+    port: process.env.REDIS_PORT,
     username : process.env.REDIS_USER,
     password: process.env.REDIS_PASSWORD,
     tls : {},
@@ -25,8 +25,16 @@ const redisOptions = {
     maxRetriesPerRequest : 50
 };
 
-const pub = Redis.createClient(redisOptions);
-const sub = Redis.createClient(redisOptions);
+const pub = new Redis(redisOptions);
+const sub = new Redis(redisOptions);
+
+pub.on('connect', async function() {
+    console.log('Pub Connected!');
+});
+
+sub.on('connect', async function() {
+console.log('Sub Connected!');
+});
 
 // Handle Redis client errors
 pub.on('error', (error) => {
