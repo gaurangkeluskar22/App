@@ -19,7 +19,7 @@ export const SocketContextProvider = ({children}) => {
         if(userId){
             //https://chatapp-3rqf.onrender.com
             //http://localhost:9999
-            const socket = io(`${env.REACT_APP_URL}`,{
+            const socket = io('http://localhost:9999',{
                 query:{
                     userId : userId
                 }

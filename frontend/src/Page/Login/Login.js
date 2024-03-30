@@ -40,8 +40,7 @@ const Login = () => {
             password : password,
         }
 
-        console.log("api:",env.REACT_APP_URL)
-        await axios.post(`${env.REACT_APP_URL}/api/auth/login`, payload, headers).then((res)=>{
+        await axios.post(`http://localhost:9999/api/auth/login`, payload, headers).then((res)=>{
             if(res?.data?.success){
                 const token = res?.data?.token
                 localStorage.setItem("token", token)

@@ -55,7 +55,7 @@ const SignUp = () => {
             profilePic : ''
         }
 
-        await axios.post(`${env.REACT_APP_URL}/api/auth/signup`, payload, headers).then((res)=>{
+        await axios.post(`http://localhost:9999/api/auth/signup`, payload, headers).then((res)=>{
             if(res?.data?.success){
                 navigate('/login')
             }

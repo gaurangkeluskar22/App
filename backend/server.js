@@ -26,7 +26,6 @@ app.get("*", (req, res)=>{
 async function init () {
     server.listen(port, ()=>{
         connectToMongoDB()
-        console.log("ReactApp:",process.env.REACT_APP_URL)
         console.log("app is listening on PORT:", port)
     })
 }
