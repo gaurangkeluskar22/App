@@ -1,27 +1,27 @@
 version: '3'
 services:
-  backend:
-    container_name: backend
+  backend_2:
+    container_name: backend_2
     build:
       context: ./backend
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile.1
     ports: 
-      - "9999:9999"
+      - "8888:8888"
     env_file: 
-      - ./backend/.env
+      - ./backend/.env.1
     volumes:
       - ./backend:/app
   
-  frontend:
-    container_name: frontend
+  frontend_2:
+    container_name: frontend_2
     build:
       context: ./frontend
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile.1
     ports: 
-      - "3000:3000"
+      - "4000:3000"
     volumes:
       - ./frontend/src:/app/src
     depends_on:
-      - backend
+      - backend_2
 volumes:
   data:
