@@ -8,7 +8,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: ['http://localhost:3000'],
+        origin: ['http://localhost:4000'],
         methods: ["GET", "POST"]
     }
 });
@@ -60,11 +60,13 @@ class RedisClient {
     const redisClient = new RedisClient();
 
 const getReceiverSocketId = async(receiverId) => {
-    return await redisClient.redis.hget("userSocketMap",receiverId);
+    const value =  await redisClient.redis.hget("userSocketMap",receiverId);
+    return value;
 };
 
 const getSenderSocketId = async(senderId) => {
-    return await redisClient.redis.hget("userSocketMap",senderId);
+    const value = await redisClient.redis.hget("userSocketMap",senderId);
+    return value;
 };
 
 // const userSocketMap = {};
