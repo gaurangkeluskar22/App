@@ -28,6 +28,7 @@ class RedisClient {
             };
             this.pub = new Redis(redisOptions);
             this.sub = new Redis(redisOptions);
+            this.redis = new Redis(redisOptions);
 
             this.pub.on('connect', () => {
                 console.log('Pub Connected!');
@@ -58,23 +59,30 @@ class RedisClient {
 
     const redisClient = new RedisClient();
 
-const getReceiverSocketId = (receiverId) => {
-    return userSocketMap[receiverId];
+const getReceiverSocketId = async(receiverId) => {
+    return await redisClient.redis.hget("userSocketMap",receiverId);
 };
 
-const getSenderSocketId = (senderId) => {
-    return userSocketMap[senderId];
+const getSenderSocketId = async(senderId) => {
+    return await redisClient.redis.hget("userSocketMap",senderId);
 };
 
-const userSocketMap = {};
+// const userSocketMap = {};
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
     console.log("a user connected:", socket.id);
     const userId = socket.handshake.query.userId;
 
     if (userId !== "undefined") {
-        userSocketMap[userId] = socket.id;
+        // userSocketMap[userId] = socket.id;
+        await redisClient.redis.hset("userSocketMap", userId, socket.id);
     }
+
+    // Get all userSocketMap entries from Redis
+    const userSocketMapEntries = await redisClient.redis.hgetall("userSocketMap");
+    const userSocketMap = Object.fromEntries(
+        Object.entries(userSocketMapEntries).map(([userId, socketId]) => [userId, socketId])
+    );
 
     console.log(userSocketMap);
 
@@ -82,11 +90,16 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     // socket.on() method is used to listen to the events. it can be used on both client and server side
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async() => {
         console.log("a user disconnected:", socket.id);
         // remove user from map
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+        await redisClient.redis.hdel("userSocketMap", userId);
+        // Get updated userSocketMap after removal
+        const updatedUserSocketMapEntries = await redisClient.redis.hgetall("userSocketMap");
+        const updatedUserSocketMap = Object.fromEntries(
+            Object.entries(updatedUserSocketMapEntries).map(([userId, socketId]) => [userId, socketId])
+        );
+        io.emit("getOnlineUsers", Object.keys(updatedUserSocketMap));
     });
 });
 
