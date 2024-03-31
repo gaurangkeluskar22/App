@@ -2,23 +2,23 @@ version: '3'
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: ./backend/Dockerfile
+      context: /backend
+      dockerfile: /backend/Dockerfile
     ports: 
       - "9999:9999"
     env_file: 
-      - ./backend/.env
+      - /backend/.env
     volumes:
-      - ./backend:/app
+      - /backend:/app
   
   frontend:
     build:
-      context: ./frontend
-      dockerfile: ./frontend/Dockerfile
+      context: /frontend
+      dockerfile: /frontend/Dockerfile
     ports: 
       - "3000:3000"
     volumes:
-      - ./frontend/src:/app/src
+      - /frontend/src:/app/src
     depends_on:
       - backend
 volumes:
