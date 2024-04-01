@@ -1,7 +1,7 @@
 const Conversation = require("../models/conversation.model")
 const Message = require("../models/message.model")
 const { io } = require("../socket/socket")
-const {redisClient} = require('../RedisClient/RedisClient')
+const {pub} = require('../RedisClient/RedisClient')
 
 
 const sendMessageController = async (req, res) => {
@@ -40,31 +40,11 @@ const sendMessageController = async (req, res) => {
 
         try{
             // publish the message to the server using pub/sub model
-            await redisClient.pub.publish("Message", JSON.stringify({newMessage}))
+            await pub.publish("Message", JSON.stringify({newMessage}))
         }catch(err){
             console.log("err:", err)
         }
-        // listen to the message comming from redis
-        redisClient.sub.on('message', async(channel, message)=>{
-            console.log('Received message:', message);
-            if(channel === 'Message'){
-                const decodedMessage =  JSON.parse(message)
-                // emit message to sender and receiver
-                const receiverSocketId = await redisClient.redis.hget("userSocketMap", decodedMessage?.newMessage?.receiverId);
-                
-                const senderSocketId = await redisClient.redis.hget("userSocketMap",decodedMessage?.newMessage?.senderId)
-
-                if(receiverSocketId){
-                    console.log("here")
-                    io.to(receiverSocketId).emit("newMessage", decodedMessage?.newMessage)
-                }
-
-                if(senderSocketId){
-                    io.to(senderSocketId).emit("newMessage", decodedMessage?.newMessage)
-                }
-            }
-        })
-
+        
         res.status(200).json({
             success : true,
             result : "Message has been sent Successfully!"
