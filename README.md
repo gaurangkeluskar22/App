@@ -1,5 +1,8 @@
 # Realtime MERN ChatApp powered by Socket.io
-Link:- https://chatapp-3rqf.onrender.com
+
+## Chat App Architecture
+![image](https://github.com/gaurangkeluskar22/MERN-Socket.io-ChatApp/assets/43683829/edfabe0a-2208-484a-aebb-e6793b9101b9)
+
 
 ## Sigin Up page
 ![image](https://github.com/gaurangkeluskar22/App/assets/43683829/0ffe1242-9356-4f81-8518-3cf8020bb9af)
