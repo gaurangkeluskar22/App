@@ -225,10 +225,12 @@ const HomePage = () => {
             socket.on("peer:nego:final", handleNegoNeedFinal);
             }
         return () => {
+            if(socket){
             socket.off("user:incomming:call", handleIncommingCall)
             socket.off("user:call:accepted", handleCallAccepted)
             socket.off("peer:nego:needed", handleNegoNeedIncomming);
             socket.off("peer:nego:final", handleNegoNeedFinal);
+            }
         }
     },[socket, handleIncommingCall, handleCallAccepted, handleNegoNeedIncomming, handleNegoNeedFinal])
 
