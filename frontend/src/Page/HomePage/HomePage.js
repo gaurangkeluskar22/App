@@ -213,24 +213,21 @@ const HomePage = () => {
     },[handleNegoNeeded])
 
     useEffect(() => {
-        if(peer){
             peer.peer.addEventListener("track", async (ev) => {
             const remoteStream = ev.streams;
             console.log("GOT TRACKS!!");
             setRemoteStream(remoteStream[0]);
             });
-        }
       }, []);
 
       const endCallBtn = (e) => {
         e?.preventDefault()
-            if(peer){
-                peer.peer.close()
-                peer.peer = null
-            }
             if (myStream) {
                 myStream.getTracks().forEach(track => track.stop());
             }
+            setMyStream(null)
+            setRemoteStream(null)
+            setIsCall(false)
       }
 
 
