@@ -202,19 +202,36 @@ const HomePage = () => {
       }, []);
 
     useEffect(()=>{
-        peer.peer.addEventListener('negotiationneeded',handleNegoNeeded)
+        if(peer?.peer){
+            peer.peer.addEventListener('negotiationneeded',handleNegoNeeded)
+        }
         return()=>{
-            peer.peer.removeEventListener('negotiationneeded',handleNegoNeeded)
+            if(peer?.peer){
+                peer.peer.removeEventListener('negotiationneeded',handleNegoNeeded)
+            }
         }
     },[handleNegoNeeded])
 
     useEffect(() => {
-        peer.peer.addEventListener("track", async (ev) => {
-          const remoteStream = ev.streams;
-          console.log("GOT TRACKS!!");
-          setRemoteStream(remoteStream[0]);
-        });
+        if(peer){
+            peer.peer.addEventListener("track", async (ev) => {
+            const remoteStream = ev.streams;
+            console.log("GOT TRACKS!!");
+            setRemoteStream(remoteStream[0]);
+            });
+        }
       }, []);
+
+      const endCallBtn = (e) => {
+        e?.preventDefault()
+            if(peer){
+                peer.peer.close()
+                peer.peer = null
+            }
+            if (myStream) {
+                myStream.getTracks().forEach(track => track.stop());
+            }
+      }
 
 
     useEffect(()=>{
@@ -301,7 +318,10 @@ const HomePage = () => {
                             />
                         }</div>
                         </div>
-                        <div><button>Mic</button> <button>Video</button> <button>End Call</button></div>
+                        <div>
+                            <button>Mic</button> 
+                            <button>Video</button> 
+                            <button onClick={endCallBtn}>End Call</button></div>
                     </div>
                 </div>
 
