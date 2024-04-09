@@ -35,9 +35,26 @@ io.on("connection", async (socket) => {
     console.log(userSocketMap);
 
     // io.emit() is used to send events to all the connected clients
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    
+    io.emit("getOnlineUsers", userSocketMap);
 
+    socket.on("user:call", (data)=>{
+        const {to, offer} = data
+        io.to(to).emit('user:incomming:call', {from : socket.id, offer})
+    })
+
+    socket.on("user:call:accepted", (data)=>{
+        const {to, ans} = data
+        io.to(to).emit('user:call:accepted', {from : socket.id, ans})
+    })
+
+    socket.on("peer:nego:needed", ({ to, offer }) => {
+        io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
+      });
+    
+      socket.on("peer:nego:done", ({ to, ans }) => {
+        io.to(to).emit("peer:nego:final", { from: socket.id, ans });
+      });
+    
     // socket.on() method is used to listen to the events. it can be used on both client and server side
     socket.on("disconnect", async() => {
         console.log("a user disconnected:", socket.id);
