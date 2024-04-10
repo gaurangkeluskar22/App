@@ -54,6 +54,11 @@ io.on("connection", async (socket) => {
       socket.on("peer:nego:done", ({ to, ans }) => {
         io.to(to).emit("peer:nego:final", { from: socket.id, ans });
       });
+
+      socket.on("call:end", (data)=>{
+        const {to} = data
+        io.to(to).emit("call:ended")
+      })
     
     // socket.on() method is used to listen to the events. it can be used on both client and server side
     socket.on("disconnect", async() => {

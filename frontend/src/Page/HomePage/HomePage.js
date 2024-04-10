@@ -228,7 +228,17 @@ const HomePage = () => {
             setMyStream(null)
             setRemoteStream(null)
             setIsCall(false)
+            socket.emit('call:end',{to:remoteUserSocketId})
       }
+
+      const handleCallEnded = useCallback(()=>{
+            if (myStream) {
+                myStream.getTracks().forEach(track => track.stop());
+            }
+            setMyStream(null)
+            setRemoteStream(null)
+            setIsCall(false)
+      },[])
 
 
     useEffect(()=>{
@@ -237,6 +247,7 @@ const HomePage = () => {
             socket.on("user:call:accepted", handleCallAccepted)
             socket.on("peer:nego:needed", handleNegoNeedIncomming);
             socket.on("peer:nego:final", handleNegoNeedFinal);
+            socket.on("call:ended", handleCallEnded)
             }
         return () => {
             if(socket){
@@ -244,6 +255,7 @@ const HomePage = () => {
             socket.off("user:call:accepted", handleCallAccepted)
             socket.off("peer:nego:needed", handleNegoNeedIncomming);
             socket.off("peer:nego:final", handleNegoNeedFinal);
+            socket.off("call:ended", handleCallEnded)
             }
         }
     },[socket, handleIncommingCall, handleCallAccepted, handleNegoNeedIncomming, handleNegoNeedFinal])
