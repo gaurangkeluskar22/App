@@ -1,4 +1,4 @@
-# Realtime MERN ChatApp powered by Socket.io
+# Realtime MERN ChatApp powered by Socket.io, WebRTC
 
 ## Chat App Architecture
 ![image](https://github.com/gaurangkeluskar22/MERN-Socket.io-ChatApp/assets/43683829/edfabe0a-2208-484a-aebb-e6793b9101b9)
@@ -15,6 +15,10 @@
 
 ## View Message Page
 ![image](https://github.com/gaurangkeluskar22/App/assets/43683829/f51b5150-5758-4e69-a0cb-694c4d6348b6)
+
+## WebRTC Video Call
+![image](https://github.com/gaurangkeluskar22/MERN-Socket.io-ChatApp/assets/43683829/06f53d4f-10ae-47fa-ae87-1a5064e23f74)
+
 
 
 
