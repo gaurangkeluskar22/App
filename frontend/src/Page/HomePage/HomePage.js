@@ -16,6 +16,7 @@ import { FaVideo } from "react-icons/fa6";
 import { FaVideoSlash } from "react-icons/fa6";
 import { RiMicFill } from "react-icons/ri";
 import { RiMicOffFill } from "react-icons/ri";
+import { FcVideoCall } from "react-icons/fc";
 
 const HomePage = () => {
     const headers = getRequestedHeader()
@@ -385,7 +386,7 @@ const HomePage = () => {
                 <div style={{height: '100vh', width:'70vw', alignItems:'start', display:'flex',justifyContent:'end', flexDirection:'column'}}>
                     <div style={{width:'60vw', background:'#8599FF', justifyContent:'space-between', display:'flex', height:'130px', alignItems:'center'}}>
                         <p style={{padding:'20px', fontSize:'20px'}}>To : {selectedUser?.name}</p>
-                        {onlineUsers?.hasOwnProperty(selectedUser?._id) && <button style={{width:'100px'}} onClick={handleCall}>Call</button>}
+                        {onlineUsers?.hasOwnProperty(selectedUser?._id) && <FcVideoCall style={{fontSize:'50px'}} onClick={handleCall}/>}
                     </div>
                         {
                             messages?.length 
