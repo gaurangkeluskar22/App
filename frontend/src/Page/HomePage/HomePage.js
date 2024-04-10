@@ -11,6 +11,11 @@ import { useSocketContext } from "../../Context/SocketContext";
 import { env } from "../../env";
 import ReactPlayer from 'react-player'
 import peer from '../../service/peer'
+import { MdCallEnd } from "react-icons/md";
+import { FaVideo } from "react-icons/fa6";
+import { FaVideoSlash } from "react-icons/fa6";
+import { RiMicFill } from "react-icons/ri";
+import { RiMicOffFill } from "react-icons/ri";
 
 const HomePage = () => {
     const headers = getRequestedHeader()
@@ -32,6 +37,8 @@ const HomePage = () => {
     const {authUser, setAuthUser, setUserId} = useAuthContext()
     const {onlineUsers, socket} = useSocketContext()
     const containerRef = useRef(null);
+    const [isVideoEnabled, setIsVideoEnabled] = useState(true)
+    const [isAudioEnabled, setIsAudioEnabled] = useState(true)
 
   // This effect will run every time the component updates
   useEffect(() => {
@@ -141,15 +148,16 @@ const HomePage = () => {
 
     const handleCall = useCallback(async () => {
         setIsCall(true)
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true})
+        const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
         const offer = await peer.getOffer()
         socket.emit("user:call", {to: remoteUserSocketId, offer})
         setMyStream(stream)
         setShowCallingText(true)
-    },[socket, remoteUserSocketId])
+    },[isAudioEnabled, isVideoEnabled, socket, remoteUserSocketId])
 
     const handleIncommingCall = useCallback(async (data)=>{
         setAcceptCallButton(true)
+        setIsCall(true)
         setTempData(data)
     },[])
 
@@ -167,14 +175,13 @@ const HomePage = () => {
         if(tempData){
         setAcceptCallButton(false)
         setIsCall(true)
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true})
+        const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
         setMyStream(stream)
-        console.log("tempData:",tempData)
         const ans = await peer.getAnswer(tempData?.offer)
         socket.emit("user:call:accepted",{to : tempData?.from, ans})
         setShowPolicy(true)
         }
-    },[socket, tempData])
+    },[isAudioEnabled, isVideoEnabled, socket, tempData])
 
 
     const handleCallAccepted = useCallback((data)=>{
@@ -212,13 +219,18 @@ const HomePage = () => {
         }
     },[handleNegoNeeded])
 
+    const handleListenTrack = useCallback(async (ev) => {
+        const remoteStream = ev.streams;
+        console.log("GOT TRACKS!!");
+        setRemoteStream(remoteStream[0]);
+        },[])
+
     useEffect(() => {
-            peer.peer.addEventListener("track", async (ev) => {
-            const remoteStream = ev.streams;
-            console.log("GOT TRACKS!!");
-            setRemoteStream(remoteStream[0]);
-            });
-      }, []);
+            peer.peer.addEventListener("track", handleListenTrack);
+            return () =>{
+                peer.peer.removeEventListener("track", handleListenTrack);
+            }
+      },[]);
 
       const endCallBtn = (e) => {
         e?.preventDefault()
@@ -228,6 +240,9 @@ const HomePage = () => {
             setMyStream(null)
             setRemoteStream(null)
             setIsCall(false)
+            setIsVideoEnabled(true)
+            setIsAudioEnabled(true)
+            // setAcceptCallButton(false)
             socket.emit('call:end',{to:remoteUserSocketId})
       }
 
@@ -238,7 +253,21 @@ const HomePage = () => {
             setMyStream(null)
             setRemoteStream(null)
             setIsCall(false)
+            setIsVideoEnabled(true)
+            setIsAudioEnabled(true)
       },[])
+
+      useEffect(() => {
+        if (myStream) {
+            myStream.getTracks().forEach(track => {
+                if (track.kind === 'audio') {
+                    track.enabled = isAudioEnabled; // Enable/disable audio track based on isAudioEnabled state
+                } else if (track.kind === 'video') {
+                    track.enabled = isVideoEnabled; // Enable/disable video track based on isVideoEnabled state
+                }
+            });
+        }
+    }, [myStream, isAudioEnabled, isVideoEnabled]);
 
 
     useEffect(()=>{
@@ -296,7 +325,7 @@ const HomePage = () => {
             <>
             <div style={{height:'100vh', width:'70vw', justifyContent:'center', alignItems:'center', display:'flex'}}>
             {
-                isCall || acceptCallButton ? 
+                isCall ? 
                 <div ref={containerRef}>
                     {showPolicy && <div>please accept security policy<button onClick={sendStream}>Accept</button></div>}
                     <div>{showCallingState && 'Calling'}</div>
@@ -320,6 +349,7 @@ const HomePage = () => {
                         {
                             myStream && 
                             <ReactPlayer
+                                muted
                                 playing
                                 url={myStream}
                                 width="300px"
@@ -327,10 +357,19 @@ const HomePage = () => {
                             />
                         }</div>
                         </div>
-                        <div>
-                            <button>Mic</button> 
-                            <button>Video</button> 
-                            <button onClick={endCallBtn}>End Call</button></div>
+                        <div style={{display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center', padding:'10px'}}>
+                            {isAudioEnabled ? 
+                                <RiMicFill style={{fontSize:'50px', padding:'0px 20px'}} onClick={()=>setIsAudioEnabled((prevState)=>!prevState)}/>
+                                :
+                                <RiMicOffFill style={{fontSize:'50px', padding:'0px 20px'}} onClick={()=>setIsAudioEnabled((prevState)=>!prevState)}/>
+                            }   
+                            {isVideoEnabled ?
+                                <FaVideo style={{fontSize:'50px', padding:'0px 20px'}} onClick={()=>setIsVideoEnabled((prevState)=>!prevState)}/>
+                                :
+                                <FaVideoSlash style={{fontSize:'50px', padding:'0px 20px'}} onClick={()=>setIsVideoEnabled((prevState)=>!prevState)}/>
+                            }
+                            <MdCallEnd onClick={endCallBtn} style={{fontSize:'50px', padding:'0px 20px'}}/>
+                        </div>
                     </div>
                 </div>
 
@@ -346,7 +385,7 @@ const HomePage = () => {
                 <div style={{height: '100vh', width:'70vw', alignItems:'start', display:'flex',justifyContent:'end', flexDirection:'column'}}>
                     <div style={{width:'60vw', background:'#8599FF', justifyContent:'space-between', display:'flex', height:'130px', alignItems:'center'}}>
                         <p style={{padding:'20px', fontSize:'20px'}}>To : {selectedUser?.name}</p>
-                        <button style={{width:'100px'}} onClick={handleCall}>Call</button>
+                        {onlineUsers?.hasOwnProperty(selectedUser?._id) && <button style={{width:'100px'}} onClick={handleCall}>Call</button>}
                     </div>
                         {
                             messages?.length 
