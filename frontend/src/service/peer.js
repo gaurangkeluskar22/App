@@ -1,41 +1,60 @@
-class PeerService {
-    constructor(){
-        if(!this.peer){
-            this.peer = new RTCPeerConnection({
-                iceServers:[
-                    {
-                        urls : [
-                            "stun:stun.l.google.com:19302",
-                            "stun:global.stun.twilio.com:3478"
-                        ],
-                    }
+class Client {
+    constructor() {
+        this.peerConnection = null;
+    }
+
+    destroyClient(){
+        this.peerConnection = null;
+    }
+
+    initializePeerConnection() {
+        if (!this.peerConnection) {
+            this.peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
                 ]
-            })
+            });
+            this.isAudioEnabled = true;
+            this.isVideoEnabled = false;
         }
     }
 
-    async getOffer () {
-        if(this.peer){
-            const offer = await this.peer.createOffer()
-            await this.peer.setLocalDescription(new RTCSessionDescription(offer))
-            return offer
+    async getOffer() {
+        if (this.peerConnection) {
+            try {
+                const offer = await this.peerConnection.createOffer();
+                await this.peerConnection.setLocalDescription(offer);
+                return offer;
+            } catch (error) {
+                console.error("Error creating offer:", error);
+                return null;
+            }
         }
     }
 
-    async getAnswer(offer){
-        if(this.peer){
-            await this.peer.setRemoteDescription(offer)
-            const ans = await this.peer.createAnswer()
-            await this.peer.setLocalDescription(new RTCSessionDescription(ans))
-            return ans
+    async getAnswer(offer) {
+        if (this.peerConnection) {
+            try {
+                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await this.peerConnection.createAnswer();
+                await this.peerConnection.setLocalDescription(answer);
+                return answer;
+            } catch (error) {
+                console.error("Error creating answer:", error);
+                return null;
+            }
         }
     }
 
-    async setLocalDescription(ans){
-        if(this.peer){
-            await this.peer.setRemoteDescription(new RTCSessionDescription(ans))
+    async setRemoteLocalDescription(answer) {
+        if (this.peerConnection) {
+            try {
+                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            } catch (error) {
+                console.error("Error setting remote description:", error);
+            }
         }
     }
 }
 
-export default new PeerService()
+export default Client;

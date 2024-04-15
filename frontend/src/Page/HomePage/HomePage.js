@@ -8,9 +8,9 @@ import { IoChatboxEllipses } from "react-icons/io5";
 import './HomePage.css'
 import moment from "moment";
 import { useSocketContext } from "../../Context/SocketContext";
-import { env } from "../../env";
-import ReactPlayer from 'react-player'
-import peer from '../../service/peer'
+import ReactPlayer from 'react-player';
+import clientService from "../../service/clientService"
+
 import { MdCallEnd } from "react-icons/md";
 import { FaVideo } from "react-icons/fa6";
 import { FaVideoSlash } from "react-icons/fa6";
@@ -41,10 +41,15 @@ const HomePage = () => {
     const [isVideoEnabled, setIsVideoEnabled] = useState(true)
     const [isAudioEnabled, setIsAudioEnabled] = useState(true)
 
-  // This effect will run every time the component updates
+
+    useEffect(()=>{
+        clientService.initializePeerConnection()
+        return () => {
+            clientService.destroyClient()
+        }
+    },[])
+
   useEffect(() => {
-    // Scroll to the bottom of the container
-    // containerRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     if(messages?.length){
         containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
@@ -150,7 +155,7 @@ const HomePage = () => {
     const handleCall = useCallback(async () => {
         setIsCall(true)
         const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
-        const offer = await peer.getOffer()
+        const offer = await clientService.getOffer()
         socket.emit("user:call", {to: remoteUserSocketId, offer})
         setMyStream(stream)
         setShowCallingText(true)
@@ -164,9 +169,9 @@ const HomePage = () => {
 
     const sendStream = useCallback(() => {
         // Check if myStream is defined before accessing its methods
-        if (myStream && !peer.peer.track) {
+        if (myStream && !clientService.peerConnection.track) {
             for (const track of myStream.getTracks()) {
-                peer.peer.addTrack(track, myStream)
+                clientService.peerConnection.addTrack(track, myStream)
             }
             setShowPolicy(false)
         }
@@ -178,7 +183,7 @@ const HomePage = () => {
         setIsCall(true)
         const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
         setMyStream(stream)
-        const ans = await peer.getAnswer(tempData?.offer)
+        const ans = await clientService.getAnswer(tempData?.offer)
         socket.emit("user:call:accepted",{to : tempData?.from, ans})
         setShowPolicy(true)
         }
@@ -187,36 +192,32 @@ const HomePage = () => {
 
     const handleCallAccepted = useCallback((data)=>{
         const {from, ans} = data
-        peer.setLocalDescription(ans)
+        clientService.setRemoteLocalDescription(ans)
         setShowCallingText(false)
         setShowPolicy(true)
-    },[])
+    },[clientService])
 
     const handleNegoNeeded = useCallback(async () => {
-        const offer = await peer.getOffer();
+        const offer = await clientService.getOffer();
         socket.emit("peer:nego:needed", { offer, to: remoteUserSocketId });
       }, [remoteUserSocketId, socket]);
 
       const handleNegoNeedIncomming = useCallback(
         async ({ from, offer }) => {
-          const ans = await peer.getAnswer(offer);
+          const ans = await clientService.getAnswer(offer);
           socket.emit("peer:nego:done", { to: from, ans });
         },
         [socket]
       );
 
       const handleNegoNeedFinal = useCallback(async ({ ans }) => {
-        await peer.setLocalDescription(ans);
+        await clientService.setRemoteLocalDescription(ans);
       }, []);
 
     useEffect(()=>{
-        if(peer?.peer){
-            peer.peer.addEventListener('negotiationneeded',handleNegoNeeded)
-        }
+            clientService?.peerConnection?.addEventListener('negotiationneeded',handleNegoNeeded)
         return()=>{
-            if(peer?.peer){
-                peer.peer.removeEventListener('negotiationneeded',handleNegoNeeded)
-            }
+                clientService?.peerConnection?.removeEventListener('negotiationneeded',handleNegoNeeded)
         }
     },[handleNegoNeeded])
 
@@ -227,9 +228,9 @@ const HomePage = () => {
         },[])
 
     useEffect(() => {
-            peer.peer.addEventListener("track", handleListenTrack);
+            clientService?.peerConnection?.addEventListener("track", handleListenTrack);
             return () =>{
-                peer.peer.removeEventListener("track", handleListenTrack);
+                clientService?.peerConnection?.removeEventListener("track", handleListenTrack);
             }
       },[]);
 
@@ -243,7 +244,6 @@ const HomePage = () => {
             setIsCall(false)
             setIsVideoEnabled(true)
             setIsAudioEnabled(true)
-            // setAcceptCallButton(false)
             socket.emit('call:end',{to:remoteUserSocketId})
       }
 
