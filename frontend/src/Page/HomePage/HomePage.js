@@ -31,6 +31,7 @@ const HomePage = () => {
     const [remoteStream, setRemoteStream] = useState()
     const [isCall, setIsCall] = useState(false)
     const [acceptCallButton, setAcceptCallButton] = useState(false)
+    const [isCaller, setIsCaller] = useState(false)
     const [tempData, setTempData] = useState()
     const [showCallingState, setShowCallingText] = useState(false)
     const [showPolicy, setShowPolicy] = useState(false)
@@ -154,6 +155,7 @@ const HomePage = () => {
 
     const handleCall = useCallback(async () => {
         setIsCall(true)
+        setIsCaller(true)
         const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
         const offer = await clientService.getOffer()
         socket.emit("user:call", {to: remoteUserSocketId, offer})
@@ -162,7 +164,6 @@ const HomePage = () => {
     },[isAudioEnabled, isVideoEnabled, socket, remoteUserSocketId])
 
     const handleIncommingCall = useCallback(async (data)=>{
-        setAcceptCallButton(true)
         setIsCall(true)
         setTempData(data)
     },[])
@@ -179,7 +180,7 @@ const HomePage = () => {
 
     const handleAcceptCallBtn = useCallback(async () =>{
         if(tempData){
-        setAcceptCallButton(false)
+        setAcceptCallButton(true)
         setIsCall(true)
         const stream = await navigator.mediaDevices.getUserMedia({audio: isAudioEnabled, video: isVideoEnabled})
         setMyStream(stream)
@@ -242,8 +243,12 @@ const HomePage = () => {
             setMyStream(null)
             setRemoteStream(null)
             setIsCall(false)
-            setIsVideoEnabled(true)
+            setIsVideoEnabled(false)
             setIsAudioEnabled(true)
+            setIsCaller(false)
+            setShowCallingText(false)
+            setAcceptCallButton(false)
+            setShowPolicy(false)
             socket.emit('call:end',{to:remoteUserSocketId})
       }
 
@@ -254,8 +259,12 @@ const HomePage = () => {
             setMyStream(null)
             setRemoteStream(null)
             setIsCall(false)
-            setIsVideoEnabled(true)
+            setIsVideoEnabled(false)
             setIsAudioEnabled(true)
+            setIsCaller(false)
+            setShowCallingText(false)
+            setAcceptCallButton(false)
+            setShowPolicy(false)
       },[])
 
       useEffect(() => {
@@ -330,12 +339,16 @@ const HomePage = () => {
                 <div ref={containerRef}>
                     {showPolicy && <div>please accept security policy<button onClick={sendStream}>Accept</button></div>}
                     <div>{showCallingState && 'Calling'}</div>
-                    <div>
-                        {acceptCallButton && <button onClick={handleAcceptCallBtn}>Accept Call</button>}
+                    {(!acceptCallButton && !isCaller) &&       
+                    <div style={{display: 'flex', flexDirection:'row', justifyContent:'center'}}>
+                        <button onClick={handleAcceptCallBtn} style={{background:'lightgreen', border:'0px'}}>Accept Call</button>
+                        <button onClick={endCallBtn} style={{background:'red',padding:'15px', border:'0px'}}>Cancel Call</button>
                     </div>
+                    }
+                    {(acceptCallButton || isCaller) && 
                     <div style={{display:'flex', flexDirection:'column', background:'#8599FF'}}>
-                        <div style={{display:'flex', flexDirection:'row', alignItems:'end', padding:'10px'}}>
-                        <div style={{width:'400px', height:'300px'}}>
+                        <div style={{display:'flex', flexDirection:'row', alignItems:'end', padding:'20px'}}>
+                        <div style={{width:'400px', height:'300px', background:'black'}}>
                             {
                                 remoteStream && 
                                 <ReactPlayer
@@ -346,7 +359,7 @@ const HomePage = () => {
                             />
                             }
                         </div>
-                        <div style={{width:'300px', height:'200px'}}>
+                        <div style={{width:'300px', height:'200px', background:'black', marginLeft:'10px'}}>
                         {
                             myStream && 
                             <ReactPlayer
@@ -372,6 +385,7 @@ const HomePage = () => {
                             <MdCallEnd onClick={endCallBtn} style={{fontSize:'50px', padding:'0px 20px'}}/>
                         </div>
                     </div>
+                    }
                 </div>
 
             :
